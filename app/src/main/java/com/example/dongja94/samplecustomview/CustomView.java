@@ -8,7 +8,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathDashPathEffect;
+import android.graphics.PathEffect;
 import android.graphics.RectF;
+import android.graphics.SweepGradient;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -33,6 +36,8 @@ public class CustomView extends View {
     float[] points;
     Path mDrawPath;
     Path mTextPath;
+
+    Path mShapePath;
 
     private void init() {
         points = new float[(300 / 10 + 1) * 2 * 2];
@@ -67,10 +72,17 @@ public class CustomView extends View {
 
         mBitmap = bm;
 
+        mShapePath = new Path();
+        mShapePath.lineTo(-5, -5);
+        mShapePath.lineTo(0, -5);
+        mShapePath.lineTo(5, 0);
+        mShapePath.lineTo(0, 5);
+        mShapePath.lineTo(-5, 5);
     }
 
     Bitmap mBitmap;
     Matrix mMatrix = new Matrix();
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -80,9 +92,48 @@ public class CustomView extends View {
 //        drawCircle(canvas);
 //        drawPath(canvas);
 //        drawText(canvas);
-        drawBitmap(canvas);
+//        drawBitmap(canvas);
+//        drawStroke(canvas);
+//        drawPathEffect(canvas);
+        drawShader(canvas);
     }
 
+    private void drawShader(Canvas canvas) {
+
+        int[] colors = {Color.RED, Color.YELLOW, Color.BLUE, Color.RED};
+//        LinearGradient shader = new LinearGradient(100, 100, 500, 500, Color.RED, Color.BLUE, Shader.TileMode.CLAMP);
+//        LinearGradient shader = new LinearGradient(200, 100, 400, 100, colors, null, Shader.TileMode.MIRROR);
+//        RadialGradient shader = new RadialGradient(300, 300, 200, colors, null, Shader.TileMode.CLAMP);
+        SweepGradient shader = new SweepGradient(300, 300, colors, null);
+//        mPaint.setColor(Color.RED);
+        mPaint.setShader(shader);
+        canvas.drawCircle(300, 300, 200, mPaint);
+
+//        mPaint.setAlpha(0x80);
+//        canvas.drawBitmap(mBitmap, 100, 100, mPaint);
+
+
+    }
+    private void drawPathEffect(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(10);
+//        float[] intervals = {20, 10, 30, 10, 10, 10};
+//        PathEffect effect = new DashPathEffect(intervals, 20);
+
+        PathEffect effect = new PathDashPathEffect(mShapePath, 10, 0, PathDashPathEffect.Style.ROTATE);
+
+        mPaint.setPathEffect(effect);
+
+        canvas.drawCircle(300, 300, 200, mPaint);
+    }
+
+    private void drawStroke(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(10);
+        mPaint.setColor(Color.RED);
+
+        canvas.drawCircle(300, 300, 200, mPaint);
+    }
     float[] meshPoints = { 100, 100, 200, 200, 300, 100, 400, 200, 500, 100,
                              100, 500, 200, 600, 300, 500, 400, 600, 500, 500};
     private void drawBitmap(Canvas canvas) {
