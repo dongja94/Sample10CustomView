@@ -18,6 +18,9 @@ import android.graphics.SweepGradient;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.io.InputStream;
@@ -43,6 +46,8 @@ public class CustomView extends View {
     Path mTextPath;
 
     Path mShapePath;
+
+    GestureDetector mDetector;
 
     private void init(AttributeSet attrs) {
         points = new float[(300 / 10 + 1) * 2 * 2];
@@ -94,6 +99,56 @@ public class CustomView extends View {
             String title = (String)ta.getText(R.styleable.CustomView_android_title);
             ta.recycle();
         }
+
+        mDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                mScale *= 1.5f;
+                invalidate();
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                mScale /= 1.5f;
+                invalidate();
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                mX -= distanceX / mScale;
+                mY -= distanceY / mScale;
+                invalidate();
+                return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                if (e1 != null && e2 != null) {
+                    float deltaX = e1.getX() - e2.getX();
+                    if (deltaX > 0) {
+                        Log.i("CustomView", "fling next : " + deltaX);
+                    } else {
+                        Log.i("CustomView", "fling prev : " + deltaX);
+                    }
+                    return true;
+                }
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
+        });
+    }
+
+    float mScale = 1.0f;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean consumed = mDetector.onTouchEvent(event);
+        return consumed || super.onTouchEvent(event);
     }
 
     public void setBitmap(Bitmap bitmap) {
@@ -148,6 +203,8 @@ public class CustomView extends View {
         mY = getPaddingTop() + ((bottom - top) - getPaddingTop() - getPaddingBottom() - mBitmap.getHeight()) / 2;
     }
 
+
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -165,7 +222,10 @@ public class CustomView extends View {
     }
 
     private void drawLayout(Canvas canvas) {
-        canvas.drawBitmap(mBitmap, mX, mY, mPaint);
+        mMatrix.reset();
+        mMatrix.setScale(mScale, mScale, mBitmap.getWidth() / 2, mBitmap.getHeight() / 2);
+        mMatrix.postTranslate(mX, mY);
+        canvas.drawBitmap(mBitmap, mMatrix, mPaint);
     }
 
     float[] src = {
