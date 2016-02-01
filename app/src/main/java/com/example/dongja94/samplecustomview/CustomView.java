@@ -98,11 +98,55 @@ public class CustomView extends View {
 
     public void setBitmap(Bitmap bitmap) {
         mBitmap = bitmap;
+        requestLayout();
         invalidate();
     }
 
     Bitmap mBitmap;
     Matrix mMatrix = new Matrix();
+
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = getPaddingLeft() + getPaddingRight();
+        int height = getPaddingTop() + getPaddingBottom();
+
+        if (mBitmap != null) {
+            width += mBitmap.getWidth();
+            height += mBitmap.getHeight();
+        }
+
+//        int mode = MeasureSpec.getMode(widthMeasureSpec);
+//        int size = MeasureSpec.getSize(widthMeasureSpec);
+//        switch (mode) {
+//            case MeasureSpec.EXACTLY :
+//                width = size;
+//                break;
+//            case MeasureSpec.AT_MOST :
+//                if (width > size) {
+//                    width = size;
+//                }
+//                break;
+//            case MeasureSpec.UNSPECIFIED :
+//                break;
+//        }
+
+        width = resolveSize(width, widthMeasureSpec);
+        height = resolveSize(height, heightMeasureSpec);
+        setMeasuredDimension(width, height);
+
+    }
+
+    int mX, mY;
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        mX = getPaddingLeft() + ((right - left) - getPaddingLeft() - getPaddingRight() - mBitmap.getWidth()) / 2;
+        mY = getPaddingTop() + ((bottom - top) - getPaddingTop() - getPaddingBottom() - mBitmap.getHeight()) / 2;
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -121,7 +165,7 @@ public class CustomView extends View {
     }
 
     private void drawLayout(Canvas canvas) {
-        canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+        canvas.drawBitmap(mBitmap, mX, mY, mPaint);
     }
 
     float[] src = {
