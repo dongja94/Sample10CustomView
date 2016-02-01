@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,8 +10,24 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.dongja94.samplecustomview.MainActivity">
 
-    <TextView
+    <Button
+        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="change"
+        android:id="@+id/btn_change"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <com.example.dongja94.samplecustomview.CustomView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/custom_view"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/btn_change"
+        app:icon="@drawable/sample_2"
+        app:myname="YSI"
+        android:title="my title"/>
 </RelativeLayout>

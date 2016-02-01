@@ -1,10 +1,13 @@
 package com.example.dongja94.samplecustomview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -12,6 +15,8 @@ import android.graphics.PathDashPathEffect;
 import android.graphics.PathEffect;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -23,12 +28,12 @@ import java.io.InputStream;
 public class CustomView extends View {
     public CustomView(Context context) {
         super(context);
-        init();
+        init(null);
     }
 
     public CustomView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(attrs);
     }
 
     Paint mPaint = new Paint();
@@ -39,7 +44,7 @@ public class CustomView extends View {
 
     Path mShapePath;
 
-    private void init() {
+    private void init(AttributeSet attrs) {
         points = new float[(300 / 10 + 1) * 2 * 2];
         int index = 0;
         for (int i = 0; i <= 300; i += 10) {
@@ -78,11 +83,26 @@ public class CustomView extends View {
         mShapePath.lineTo(5, 0);
         mShapePath.lineTo(0, 5);
         mShapePath.lineTo(-5, 5);
+
+        if (attrs != null) {
+            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.CustomView);
+            Drawable d = ta.getDrawable(R.styleable.CustomView_icon);
+            if (d != null) {
+                mBitmap = ((BitmapDrawable) d).getBitmap();
+            }
+            String myname = (String) ta.getText(R.styleable.CustomView_myname);
+            String title = (String)ta.getText(R.styleable.CustomView_android_title);
+            ta.recycle();
+        }
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
+        invalidate();
     }
 
     Bitmap mBitmap;
     Matrix mMatrix = new Matrix();
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -95,7 +115,39 @@ public class CustomView extends View {
 //        drawBitmap(canvas);
 //        drawStroke(canvas);
 //        drawPathEffect(canvas);
-        drawShader(canvas);
+//        drawShader(canvas);
+//        drawColorEffect(canvas);
+        drawLayout(canvas);
+    }
+
+    private void drawLayout(Canvas canvas) {
+        canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+    }
+
+    float[] src = {
+        -1, 0, 0, 0, 255,
+        0, -1, 0, 0, 255,
+        0, 0, -1, 0, 255,
+        0, 0, 0, 1, 0
+    };
+
+    float saturation = 1;
+    private void drawColorEffect(Canvas canvas) {
+
+        mPaint.setColorFilter(null);
+        canvas.drawBitmap(mBitmap, 100, 100, mPaint);
+
+//        ColorMatrix colorMatrix = new ColorMatrix(src);
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(saturation);
+        saturation-= 0.01f;
+        if (saturation < 0) {
+            saturation = 1;
+        }
+        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(colorMatrix);
+        mPaint.setColorFilter(filter);
+        canvas.drawBitmap(mBitmap, 100, 600, mPaint);
+        invalidate();
     }
 
     private void drawShader(Canvas canvas) {
